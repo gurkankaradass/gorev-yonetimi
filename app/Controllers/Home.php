@@ -17,4 +17,23 @@ class Home extends BaseController
         // Verileri view dosyasına gönderiyoruz.
         return view('tasks', $data);
     }
+
+    public function create()
+    {
+
+        $model = new TaskModel();
+
+        // Formdan gelen verileri alıyoruz.
+        $data = [
+            'title' => $this->request->getPost('title'),
+            'description' => $this->request->getPost('description'),
+            'status' => 'pending'
+        ];
+
+        // Veritabanına kaydet
+        $model->insert($data);
+
+        // İşlem bitince ana sayfaya geri dön
+        return redirect()->to('/');
+    }
 }
