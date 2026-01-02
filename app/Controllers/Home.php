@@ -2,10 +2,19 @@
 
 namespace App\Controllers;
 
+use App\Models\TaskModel; // Modelimizi kullanacağımızı belirtiyoruz.
+
 class Home extends BaseController
 {
-    public function index(): string
+    public function index()
     {
-        return view('tasks');
+
+        $model = new TaskModel();
+
+        // Veritabanındaki tüm görevleri alıyoruz.
+        $data['tasks'] = $model->findAll();
+
+        // Verileri view dosyasına gönderiyoruz.
+        return view('tasks', $data);
     }
 }
