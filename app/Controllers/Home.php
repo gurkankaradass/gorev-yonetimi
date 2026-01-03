@@ -14,7 +14,7 @@ class Home extends BaseController
         $builder = $db->table('tasks');
         $builder->select('tasks.*, categories.name as category_name, categories.color as category_color');
         $builder->join('categories', 'categories.id = tasks.category_id', 'left'); // Sol birleştirme
-        $builder->orderBy('^tasks.id', 'DESC');
+        $builder->orderBy('tasks.id', 'DESC');
 
         $tasks = $builder->get()->getResultArray();
 
@@ -35,6 +35,7 @@ class Home extends BaseController
 
         // Formdan gelen verileri alıyoruz.
         $data = [
+            'category_id' => $this->request->getPost('category_id'), // Yeni Eklendi
             'title' => $this->request->getPost('title'),
             'description' => $this->request->getPost('description'),
             'status' => 'pending'

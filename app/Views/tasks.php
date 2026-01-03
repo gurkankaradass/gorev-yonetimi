@@ -2,75 +2,104 @@
 
 <?= $this->section('content') ?>
 
-<div x-data="todoApp(<?= htmlspecialchars(json_encode($tasks)) ?>)" class="max-w-2xl mx-auto bg-white p-6 rounded-lg shadow-md">
-    <h2 class="text-xl font-semibold mb-4">Görevler</h2>
+<div x-data="todoApp(<?= htmlspecialchars(json_encode($tasks)) ?>)" class="max-w-4xl mx-auto space-y-6">
+    <div class="bg-white p-4 rounded-xl shadow-sm border flex flex-col md:flex-row gap-4 justify-between items-center">
+        <div class="relative w-full md:w-1/2">
+            <input type="text" x-model="search" placeholder="Görevlerde veya açıklamalarda ara..." class="w-full pl-10 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition">
+            <span class="absolute left-3 top-2.5 text-gray-400 font-bold">🔍</span>
+        </div>
 
-    <div x-data="{open: false}"
+        <div class="flex gap-2">
+            <button @click="filterStatus = 'all'" :class="filterStatus === 'all' ? 'bg-blue-600 text-white' : 'bg-gray-100'" class="px-4 py-2 rounded-lg text-sm transition">Hepsi</button>
+            <button @click="filterStatus = 'pending'" :class="filterStatus === 'pending' ? 'bg-blue-600 text-white' : 'bg-gray-100'" class="px-4 py-2 rounded-lg text-sm transition">Bekleyenler</button>
+            <button @click="filterStatus = 'completed'" :class="filterStatus === 'completed' ? 'bg-blue-600 text-white' : 'bg-gray-100'" class="px-4 py-2 rounded-lg text-sm transition">Tamamlananlar</button>
+        </div>
+    </div>
+
+    <div class="text-right">
+        <button @click="openForm = !openForm" class="bg-indigo-600 text-white px-6 py-2 rounded-lg hover:bg-indigo-700 transition shadow-md">
+            + Yeni Görev
+        </button>
+    </div>
+
+    <div x-show="openForm"
         x-transition
-        class="mt-4 p-4 border rounded bg-gray-50 shadow-inner">
-        <form action="<?= base_url('tasks/create') ?>" method="POST">
-            <?= csrf_field() ?> <div class="mb-3">
-                <label class="block text-sm font-medium mb-1">Görev Başlığı</label>
-                <input type="text" name="title" required class="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500 outline-none">
+        class="bg-white p-6 rounded-xl border shadow-sm">
+        <form action="<?= base_url('tasks/create') ?>" method="POST" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <?= csrf_field() ?>
+            <div class="md:col-span-2">
+                <label class="text-sm font-semibold">Başlık</label>
+                <input type="text" name="title" required class="w-full p-2 border rounded mt-1">
             </div>
-
-            <div class="mb-3">
-                <label class="block text-sm font-medium mb-1">Açıklama</label>
-                <textarea name="description" class="w-full p-2 border rounded outline-none" rows="2"></textarea>
+            <div>
+                <label class="text-sm font-semibold">Kategori</label>
+                <select name="category_id" class="w-full p-2 border rounded mt-1">
+                    <?php foreach ($categories as $cat): ?>
+                        <option value="<?= $cat['id'] ?>"><?= $cat['name'] ?></option>
+                    <?php endforeach; ?>
+                </select>
             </div>
-
-            <button type="submit" class="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 transition">
+            <div>
+                <label class="text-sm font-semibold">Açıklama</label>
+                <input type="text" name="description" class="w-full p-2 border rounded mt-1">
+            </div>
+            <button type="submit" class="md:col-span-2 bg-green-600 text-white py-2 rounded-lg font-bold">
                 Kaydet
             </button>
         </form>
     </div>
 
-    <ul class="mt-6 divide-y divide-gray-200">
-        <?php if (!empty($tasks)): ?>
-            <?php foreach ($tasks as $task): ?>
-                <li class="py-3 justify-between items-center group">
+    <div class="grid gap-4">
+        <template x-for="task in filteredTasks" :key="task.id">
+            <div class="bg-white p-4 rounded-xl border shadow-sm flex justify-between items-center transition hover:shadow-md">
+                <div class="flex items-center gap-4">
+                    <span :class="task.category_color" class="w-2 h-10 rounded-full"></span>
                     <div>
-                        <div class="flex">
-                            <h3 class="font-medium <?= $task['status'] === 'complated' ? 'line-through text-gray-400' : '' ?>">
-                                <?= esc($task['title']) ?>
-                            </h3>
-                            <span class="text-[10px] uppercase font-bold ml-3 px-2 py-1 rounded <?= $task['status'] === 'completed' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800' ?>">
-                                <?= $task['status'] === 'completed' ? 'Tamamlandı' : 'Beklemede' ?>
-                            </span>
-                            <div class="flex items-center gap-2">
-                                <a href="<?= base_url('tasks/complete/' . $task['id']) ?>"
-                                    class="p-1 rounded-full hover:bg-gray-100 transition shadow-sm"
-                                    title="Durumu Değiştir">
-                                    <?php if ($task['status'] === 'completed'): ?>
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-green-500" fill-none viewBox="0 0 24 24" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                        </svg>
-                                    <?php else: ?>
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-300 hover:text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                        </svg>
-                                    <?php endif; ?>
-                                </a>
-                                <a href="<?= base_url('tasks/delete/' . $task['id']) ?>"
-                                    onclick="return confirm('Bu görevi silmek istediğinize emin misiniz?')"
-                                    class="p-1 rounded-full hover:bg-red-100 text-gray-300 hover:text-red-500 transition">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                    </svg>
-                                </a>
-                            </div>
+                        <h3 :class="task.status === 'completed' ? 'line-through text-gray-400' : 'font-bold text-gray-800'" x-text="task.title"></h3>
+                        <div class="flex gap-2 items-center">
+                            <span class="text-[10px] font-bold uppercase tracking-wider text-gray-400" x-text="task.category_name || 'Genel'"></span>
+                            <span class="text-gray-300">•</span>
+                            <p class="text-xs text-gray-500" x-text="task.description"></p>
                         </div>
-                        <p class="text-sm text-gray-500"><?= esc($task['description']) ?></p>
                     </div>
+                </div>
 
+                <div class="flex gap-3">
+                    <a :href="'<?= base_url('tasks/complete/') ?>' + task.id" class="text-green-500 hover:scale-110 transition">✔</a>
+                    <a :href="'<?= base_url('tasks/delete/') ?>' + task.id" onclick="return confirm('Silmek istediğinize emin misiniz?')" class="text-red-400 hover:scale-110 transition">🗑</a>
+                </div>
+            </div>
+        </template>
 
-
-                </li>
-            <?php endforeach; ?>
-        <?php else: ?>
-            <li class="py-4 text-center text-gray-500 italic">Henüz bir görev eklenmemiş.</li>
-        <?php endif; ?>
-    </ul>
+        <div x-show="filteredTasks.length === 0" class="text-center py-10 text-gray-400 italic">
+            Aradığınız kriterlere uygun görev bulunamadı.
+        </div>
+    </div>
 </div>
+
+<script>
+    function todoApp(initialTasks) {
+        return {
+            tasks: initialTasks,
+            search: '',
+            filterStatus: 'all',
+            openForm: false,
+
+            // Burası Alpine'in "Büyüsü": filteredTasks değiştikçe ekran otomatik yenilenir
+            get filteredTasks() {
+                return this.tasks.filter(task => {
+                    const title = task.title.toLowerCase();
+                    const desc = (task.description || '').toLowerCase();
+                    const query = this.search.toLowerCase();
+
+                    const matchesSearch = title.includes(query) || desc.includes(query);
+                    const matchesStatus = this.filterStatus == 'all' || task.status === this.filterStatus;
+
+                    return matchesSearch && matchesStatus;
+                });
+            }
+        }
+    }
+</script>
 
 <?= $this->endSection() ?>
