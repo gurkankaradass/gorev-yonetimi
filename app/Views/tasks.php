@@ -37,10 +37,25 @@
                     </div>
 
                     <div class="flex items-center gap-2">
-                        <span class="text-sm px-2 py-1 rounded <?= $task['status'] === 'complated' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800' ?>">
-                            <?= $task['status'] === 'complated' ? 'Tamamlandı' : "Beklemede" ?>
+                        <a href="<?= base_url('tasks/complete/' . $task['id']) ?>"
+                            class="p-1 rounded-full hover:bg-gray-100 transition shadow-sm"
+                            title="Durumu Değiştir">
+                            <?php if ($task['status'] === 'completed'): ?>
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-green-500" fill-none viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                            <?php else: ?>
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-300 hover:text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                            <?php endif; ?>
+                        </a>
+
+                        <span class="text-[10px] uppercase font-bold px-2 py-1 rounded <?= $task['status'] === 'completed' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800' ?>">
+                            <?= $task['status'] === 'completed' ? 'Tamamlandı' : 'Beklemede' ?>
                         </span>
                     </div>
+
                 </li>
             <?php endforeach; ?>
         <?php else: ?>

@@ -36,4 +36,21 @@ class Home extends BaseController
         // İşlem bitince ana sayfaya geri dön
         return redirect()->to('/');
     }
+
+    public function complete($id)
+    {
+        $model = new TaskModel();
+
+        // Önce bu id'li görevleri bulalım.
+        $task = $model->find($id);
+
+        if ($task) {
+            // Durumu tersine çevirelim: pending ise completed, tam tersiyse pending yapalım.
+            $newStatus = ($task['status'] === 'pending') ? 'completed' : 'pending';
+
+            $model->update($id, ['status' => $newStatus]);
+        }
+
+        return redirect()->to('/');
+    }
 }
