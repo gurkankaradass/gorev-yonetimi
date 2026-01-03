@@ -8,14 +8,24 @@ class Home extends BaseController
 {
     public function index()
     {
+        // Görevleri kategoriyle birleştirerek çekiyoruz
+        $db = \Config\Database::connect();
 
-        $model = new TaskModel();
+        $builder = $db->table('tasks');
+        $builder->select('tasks.*, categories.name as category_name, categories.color as category_color');
+        $builder->join('categories', 'categories.id = tasks.category_id', 'left'); // Sol birleştirme
+        $builder->orderBy('^tasks.id', 'DESC');
 
-        // Veritabanındaki tüm görevleri alıyoruz.
-        $data['tasks'] = $model->findAll();
+        $tasks = $builder->get()->getResultArray();
 
-        // Verileri view dosyasına gönderiyoruz.
-        return view('tasks', $data);
+        // Kategorileri de (seçim kutusu için) çekelim
+
+        $categories = $db->table('categories')->get()->getResultArray();
+
+        return view('tasks', [
+            'tasks' => $tasks,
+            'categories' => $categories
+        ]);
     }
 
     public function create()

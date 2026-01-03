@@ -2,7 +2,7 @@
 
 <?= $this->section('content') ?>
 
-<div class="max-w-2xl mx-auto bg-white p-6 rounded-lg shadow-md">
+<div x-data="todoApp(<?= htmlspecialchars(json_encode($tasks)) ?>)" class="max-w-2xl mx-auto bg-white p-6 rounded-lg shadow-md">
     <h2 class="text-xl font-semibold mb-4">Görevler</h2>
 
     <div x-data="{open: false}"
