@@ -53,4 +53,11 @@ class Home extends BaseController
 
         return redirect()->to('/');
     }
+
+    public function delete($id)
+    {
+        $model = new TaskModel();
+        $model->delete($id);
+        return redirect()->to("/");
+    }
 }
